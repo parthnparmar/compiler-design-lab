@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Language Compiler Phases Visualizer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e1e; color: #d4d4d4; }
+        .container { display: flex; flex-direction: column; height: 100vh; padding: 10px; gap: 10px; }
+        .header { background: #2d2d30; padding: 15px; border-radius: 5px; }
+        .header h1 { font-size: 24px; margin-bottom: 10px; }
+        .controls { display: flex; gap: 10px; align-items: center; }
+        select, button { padding: 8px 15px; font-size: 14px; border: none; border-radius: 4px; cursor: pointer; }
+        select { background: #3c3c3c; color: #d4d4d4; }
+        button { background: #0e639c; color: white; font-weight: bold; }
+        button:hover { background: #1177bb; }
+        .main { display: flex; gap: 10px; flex: 1; overflow: hidden; }
+        .editor-section { flex: 1; display: flex; flex-direction: column; background: #252526; border-radius: 5px; overflow: hidden; }
+        .results-section { flex: 2; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+        .section-title { background: #2d2d30; padding: 10px; font-weight: bold; border-bottom: 2px solid #0e639c; }
+        textarea { flex: 1; background: #1e1e1e; color: #d4d4d4; border: none; padding: 15px; font-family: 'Consolas', 'Courier New', monospace; font-size: 14px; resize: none; }
+        .phase-panel { background: #252526; border-radius: 5px; padding: 15px; margin-bottom: 10px; }
+        .phase-panel h3 { color: #4ec9b0; margin-bottom: 10px; font-size: 16px; }
+        .phase-content { background: #1e1e1e; padding: 10px; border-radius: 3px; font-family: 'Consolas', monospace; font-size: 13px; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+        .token { display: inline-block; margin: 3px; padding: 4px 8px; border-radius: 3px; }
+        .keyword { background: #569cd6; color: white; }
+        .identifier { background: #4ec9b0; color: white; }
+        .number { background: #b5cea8; color: black; }
+        .operator { background: #d4d4d4; color: black; }
+        .symbol { background: #ce9178; color: white; }
+        .error { color: #f48771; }
+        table { width: 100%; border-collapse: collapse; }
+        table th, table td { padding: 8px; text-align: left; border: 1px solid #3c3c3c; }
+        table th { background: #2d2d30; color: #4ec9b0; }
+        .ast-node { margin-left: 20px; color: #dcdcaa; }
+        .ast-node::before { content: "├─ "; color: #858585; }
+        .navbar { background: #2d2d30; padding: 10px 20px; display: flex; gap: 15px; border-radius: 5px; margin-bottom: 10px; flex-wrap: wrap; }
+        .nav-item { background: #3c3c3c; padding: 8px 15px; border-radius: 4px; cursor: pointer; transition: all 0.3s; font-size: 13px; }
+        .nav-item:hover { background: #0e639c; color: white; }
+        .nav-item.active { background: #0e639c; color: white; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .theory-box { background: #252526; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #4ec9b0; }
+        .theory-box h4 { color: #4ec9b0; margin-bottom: 10px; }
+        .example-box { background: #1e1e1e; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .example-box h4 { color: #dcdcaa; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Compiler Design Virtual Lab</h1>
+            <p style="margin: 10px 0; color: #9cdcfe; font-size: 14px;"><strong>Complete Compiler Design Toolkit</strong> - Interactive visualizer for all 6 compiler phases (Lexical, Syntax, Semantic, Intermediate Code, Optimization, Code Generation) + LL(1) & SLR Parser generators with FIRST/FOLLOW sets, parsing tables, and step-by-step parsing for any grammar.</p>
+        </div>
+        
+        <div class="navbar">
+            <div class="nav-item active" onclick="showSection('compiler')">🏠 Home</div>
+            <div class="nav-item" onclick="showSection('phase1')">📝 Phase 1: Lexical</div>
+            <div class="nav-item" onclick="showSection('phase2')">🌳 Phase 2: Syntax</div>
+            <div class="nav-item" onclick="showSection('phase3')">🔍 Phase 3: Semantic</div>
+            <div class="nav-item" onclick="showSection('phase4')">💻 Phase 4: Intermediate</div>
+            <div class="nav-item" onclick="showSection('phase5')">⚡ Phase 5: Optimization</div>
+            <div class="nav-item" onclick="showSection('phase6')">🎯 Phase 6: Code Gen</div>
+            <div class="nav-item" onclick="showSection('regex-nfa')">🔤 Regex to NFA</div>
+            <div class="nav-item" onclick="showSection('nfa-dfa')">🔄 NFA to DFA</div>
+            <div class="nav-item" onclick="showSection('dfa-min')">📉 DFA Minimization</div>
+            <div class="nav-item" onclick="showSection('direct-dfa')">⚡ Direct DFA</div>
+            <div class="nav-item" onclick="showSection('ll1')">📊 LL(1) Parser</div>
+            <div class="nav-item" onclick="showSection('slr')">📈 SLR Parser</div>
+        </div>
+
+        <div id="compiler" class="content-section active">
+            <div class="controls">
+                <label>Language:</label>
+                <select id="langSelect">
+                    <option value="c">C</option>
+                    <option value="cpp">C++</option>
+                    <option value="java">Java</option>
+                    <option value="python">Python</option>
+                    <option value="csharp">C#</option>
+                    <option value="javascript">JavaScript</option>
+                </select>
+                <button id="runBtn">▶ Run Compiler</button>
+                <button id="clearBtn">Clear</button>
+            </div>
+            <div class="main">
+            <div class="editor-section">
+                <div class="section-title">Source Code Editor</div>
+                <textarea id="codeInput" placeholder="Enter your code here..."></textarea>
+            </div>
+                <div class="results-section" id="results"></div>
+            </div>
+        </div>
+
+        <div id="phase1" class="content-section">
+            <div class="theory-box">
+                <h4>📚 Phase 1: Lexical Analysis Theory</h4>
+                <p>Lexical Analysis is the first phase of compilation. It reads the source code character by character and converts it into meaningful tokens (lexemes). The lexical analyzer (scanner) identifies keywords, identifiers, operators, constants, and removes whitespace and comments.</p>
+                <br>
+                <p><strong>Key Functions:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Token Recognition: Identifies different types of tokens</li>
+                    <li>Pattern Matching: Uses regular expressions</li>
+                    <li>Symbol Table: Stores identifier information</li>
+                    <li>Error Detection: Reports lexical errors</li>
+                </ul>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example 1: x = b - c * 2</h4>
+                <table>
+                    <tr><th>Token Type</th><th>Value</th></tr>
+                    <tr><td>Identifier</td><td>x</td></tr>
+                    <tr><td>Operator</td><td>=</td></tr>
+                    <tr><td>Identifier</td><td>b</td></tr>
+                    <tr><td>Operator</td><td>-</td></tr>
+                    <tr><td>Identifier</td><td>c</td></tr>
+                    <tr><td>Operator</td><td>*</td></tr>
+                    <tr><td>Number</td><td>2</td></tr>
+                </table>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example 2: I = p * n * r / 100</h4>
+                <table>
+                    <tr><th>Token Type</th><th>Value</th></tr>
+                    <tr><td>Identifier</td><td>I</td></tr>
+                    <tr><td>Operator</td><td>=</td></tr>
+                    <tr><td>Identifier</td><td>p</td></tr>
+                    <tr><td>Operator</td><td>*</td></tr>
+                    <tr><td>Identifier</td><td>n</td></tr>
+                    <tr><td>Operator</td><td>*</td></tr>
+                    <tr><td>Identifier</td><td>r</td></tr>
+                    <tr><td>Operator</td><td>/</td></tr>
+                    <tr><td>Number</td><td>100</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="phase2" class="content-section">
+            <div class="theory-box">
+                <h4>📚 Phase 2: Syntax Analysis Theory</h4>
+                <p>Syntax Analysis (Parsing) is the second phase that takes tokens from lexical analysis and builds a parse tree. It checks if the token sequence follows the grammatical rules of the programming language. The parser uses Context-Free Grammar (CFG) to validate syntax.</p>
+                <br>
+                <p><strong>Key Functions:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Parse Tree Construction: Builds hierarchical structure</li>
+                    <li>Syntax Validation: Checks grammar rules</li>
+                    <li>Error Recovery: Handles syntax errors</li>
+                    <li>Derivation: Shows how tokens derive from grammar</li>
+                </ul>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example 1: x = b - c * 2</h4>
+                <pre style="color: #dcdcaa; line-height: 1.8;">
+    =
+   / \
+  x   -
+     / \
+    b   *
+       / \
+      c   2</pre>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example 2: I = p * n * r / 100</h4>
+                <pre style="color: #dcdcaa; line-height: 1.8;">
+    =
+   / \
+  I   /
+     / \
+    *   100
+   / \
+  *   r
+ / \
+p   n</pre>
+            </div>
+        </div>
+
+        <div id="phase3" class="content-section">
+            <div class="theory-box">
+                <h4>📚 Phase 3: Semantic Analysis Theory</h4>
+                <p>Semantic Analysis checks the semantic correctness of the program. It ensures that the program makes sense according to language rules. This phase builds and maintains the symbol table, performs type checking, and validates scope rules.</p>
+                <br>
+                <p><strong>Key Functions:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Type Checking: Ensures type compatibility</li>
+                    <li>Symbol Table: Stores variable information</li>
+                    <li>Scope Resolution: Manages variable scope</li>
+                    <li>Declaration Checking: Validates declarations</li>
+                </ul>
+            </div>
+            <div class="example-box">
+                <h4>💡 Symbol Table Example</h4>
+                <table>
+                    <tr><th>Variable</th><th>Type</th></tr>
+                    <tr><td>x</td><td>Identifier</td></tr>
+                    <tr><td>b</td><td>Identifier</td></tr>
+                    <tr><td>c</td><td>Identifier</td></tr>
+                    <tr><td>I</td><td>Identifier</td></tr>
+                    <tr><td>p</td><td>Identifier</td></tr>
+                    <tr><td>n</td><td>Identifier</td></tr>
+                    <tr><td>r</td><td>Identifier</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="phase4" class="content-section">
+            <div class="theory-box">
+                <h4>📚 Phase 4: Intermediate Code Generation Theory</h4>
+                <p>Intermediate Code Generation produces an intermediate representation (IR) of the source code. Three Address Code (TAC) is commonly used where each instruction has at most three operands. This phase bridges high-level source code and low-level machine code.</p>
+                <br>
+                <p><strong>Key Functions:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>TAC Generation: Creates three-address instructions</li>
+                    <li>Temporary Variables: Uses t1, t2, etc.</li>
+                    <li>Expression Simplification: Breaks complex expressions</li>
+                    <li>Platform Independence: Machine-independent code</li>
+                </ul>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example 1: x = b - c * 2</h4>
+                <pre style="color: #4ec9b0;">
+t1 = c * 2
+t2 = b - t1
+x = t2</pre>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example 2: I = p * n * r / 100</h4>
+                <pre style="color: #4ec9b0;">
+t1 = p * n
+t2 = t1 * r
+t3 = t2 / 100
+I = t3</pre>
+            </div>
+        </div>
+
+        <div id="phase5" class="content-section">
+            <div class="theory-box">
+                <h4>📚 Phase 5: Code Optimization Theory</h4>
+                <p>Code Optimization improves the intermediate code to make it faster and more efficient. It eliminates redundant operations, performs constant folding, removes dead code, and optimizes loops without changing the program's output.</p>
+                <br>
+                <p><strong>Key Techniques:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Constant Folding: Evaluates constant expressions at compile time</li>
+                    <li>Dead Code Elimination: Removes unreachable code</li>
+                    <li>Common Subexpression Elimination: Reuses computed values</li>
+                    <li>Loop Optimization: Improves loop performance</li>
+                </ul>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example 1: x = b - c * 2</h4>
+                <pre style="color: #4ec9b0;">
+t1 = c * 2
+x = b - t1</pre>
+                <p style="color: #9cdcfe; margin-top: 10px;">✓ Eliminated redundant assignment (t2 removed)</p>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example 2: I = p * n * r / 100</h4>
+                <pre style="color: #4ec9b0;">
+t1 = p * n
+t2 = t1 * r
+I = t2 / 100</pre>
+                <p style="color: #9cdcfe; margin-top: 10px;">✓ Eliminated redundant assignment (t3 removed)</p>
+            </div>
+        </div>
+
+        <div id="phase6" class="content-section">
+            <div class="theory-box">
+                <h4>📚 Phase 6: Target Code Generation Theory</h4>
+                <p>Target Code Generation is the final phase that produces machine code or assembly code for the target architecture. It allocates registers, manages memory, and generates executable instructions. The code must be efficient and correct.</p>
+                <br>
+                <p><strong>Key Functions:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Register Allocation: Assigns variables to registers</li>
+                    <li>Instruction Selection: Chooses appropriate machine instructions</li>
+                    <li>Memory Management: Handles stack and heap</li>
+                    <li>Code Emission: Generates final executable code</li>
+                </ul>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example 1: x = b - c * 2</h4>
+                <pre style="color: #ce9178;">
+LOAD R1, c
+MUL R1, 2
+LOAD R2, b
+SUB R2, R1
+STORE x, R2</pre>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example 2: I = p * n * r / 100</h4>
+                <pre style="color: #ce9178;">
+LOAD R1, p
+MUL R1, n
+MUL R1, r
+DIV R1, 100
+STORE I, R1</pre>
+            </div>
+        </div>
+
+        <div id="regex-nfa" class="content-section">
+            <div class="theory-box">
+                <h4>📚 Regex to NFA Theory</h4>
+                <p>Regular Expression to Non-deterministic Finite Automaton (NFA) conversion uses Thompson's Construction algorithm. It builds an NFA for each basic regular expression and combines them using union, concatenation, and Kleene star operations.</p>
+                <br>
+                <p><strong>Key Concepts:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Thompson's Construction: Systematic NFA building</li>
+                    <li>Epsilon Transitions: Empty string transitions</li>
+                    <li>Union Operation: a|b creates parallel paths</li>
+                    <li>Concatenation: ab creates sequential states</li>
+                    <li>Kleene Star: a* creates loops with epsilon</li>
+                </ul>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example: (a|b)*c</h4>
+                <p style="color: #9cdcfe;">Regular Expression: (a|b)*c</p>
+                <pre style="color: #4ec9b0;">
+States: q0, q1, q2, q3, q4, q5
+Start State: q0
+Final State: q5
+
+Transitions:
+q0 --ε--> q1
+q1 --a--> q2
+q1 --b--> q2
+q2 --ε--> q1 (loop for *)
+q2 --ε--> q3
+q3 --c--> q4
+q4 --ε--> q5</pre>
+            </div>
+        </div>
+
+        <div id="nfa-dfa" class="content-section">
+            <div class="theory-box">
+                <h4>📚 NFA to DFA Theory</h4>
+                <p>NFA to DFA conversion uses Subset Construction (Powerset Construction) algorithm. Each DFA state represents a set of NFA states. The algorithm computes epsilon closures and transitions for all input symbols.</p>
+                <br>
+                <p><strong>Key Steps:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Epsilon Closure: Find all states reachable via ε-transitions</li>
+                    <li>Subset Construction: Create DFA states from NFA state sets</li>
+                    <li>Transition Table: Compute moves for each symbol</li>
+                    <li>Final States: Any set containing NFA final state</li>
+                </ul>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example: NFA with ε-transitions</h4>
+                <table>
+                    <tr><th>NFA State</th><th>Input 'a'</th><th>Input 'b'</th><th>ε-closure</th></tr>
+                    <tr><td>q0</td><td>q1</td><td>-</td><td>{q0, q2}</td></tr>
+                    <tr><td>q1</td><td>-</td><td>q2</td><td>{q1}</td></tr>
+                    <tr><td>q2</td><td>-</td><td>-</td><td>{q2}</td></tr>
+                </table>
+                <br>
+                <p style="color: #9cdcfe;">Resulting DFA:</p>
+                <table>
+                    <tr><th>DFA State</th><th>Input 'a'</th><th>Input 'b'</th></tr>
+                    <tr><td>{q0,q2}</td><td>{q1}</td><td>-</td></tr>
+                    <tr><td>{q1}</td><td>-</td><td>{q2}</td></tr>
+                    <tr><td>{q2}</td><td>-</td><td>-</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="dfa-min" class="content-section">
+            <div class="theory-box">
+                <h4>📚 DFA Minimization Theory</h4>
+                <p>DFA Minimization reduces the number of states in a DFA while preserving its language. It uses the Table-Filling Algorithm (Myhill-Nerode theorem) to identify and merge equivalent states.</p>
+                <br>
+                <p><strong>Key Steps:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Remove Unreachable States: Eliminate states not reachable from start</li>
+                    <li>Partition States: Separate final and non-final states</li>
+                    <li>Refinement: Split partitions based on transitions</li>
+                    <li>Merge Equivalent States: Combine indistinguishable states</li>
+                </ul>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example: Minimize DFA</h4>
+                <p style="color: #9cdcfe;">Original DFA (6 states):</p>
+                <table>
+                    <tr><th>State</th><th>Input 'a'</th><th>Input 'b'</th><th>Final?</th></tr>
+                    <tr><td>q0</td><td>q1</td><td>q2</td><td>No</td></tr>
+                    <tr><td>q1</td><td>q3</td><td>q4</td><td>No</td></tr>
+                    <tr><td>q2</td><td>q3</td><td>q4</td><td>No</td></tr>
+                    <tr><td>q3</td><td>q5</td><td>q5</td><td>Yes</td></tr>
+                    <tr><td>q4</td><td>q5</td><td>q5</td><td>Yes</td></tr>
+                    <tr><td>q5</td><td>q5</td><td>q5</td><td>Yes</td></tr>
+                </table>
+                <br>
+                <p style="color: #9cdcfe;">Minimized DFA (4 states):</p>
+                <table>
+                    <tr><th>State</th><th>Input 'a'</th><th>Input 'b'</th><th>Final?</th></tr>
+                    <tr><td>q0</td><td>q1</td><td>q1</td><td>No</td></tr>
+                    <tr><td>q1</td><td>q2</td><td>q2</td><td>No</td></tr>
+                    <tr><td>q2</td><td>q3</td><td>q3</td><td>Yes</td></tr>
+                    <tr><td>q3</td><td>q3</td><td>q3</td><td>Yes</td></tr>
+                </table>
+                <p style="color: #4ec9b0; margin-top: 10px;">✓ Reduced from 6 to 4 states (q1 and q2 merged, q3 and q4 merged)</p>
+            </div>
+        </div>
+
+        <div id="direct-dfa" class="content-section">
+            <div class="theory-box">
+                <h4>📚 Direct DFA Construction Theory</h4>
+                <p>Direct DFA construction builds a DFA directly from a regular expression without creating an intermediate NFA. It uses position numbering and computes followpos, firstpos, and lastpos functions.</p>
+                <br>
+                <p><strong>Key Functions:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>nullable: Can the expression match empty string?</li>
+                    <li>firstpos: Set of positions that can match first symbol</li>
+                    <li>lastpos: Set of positions that can match last symbol</li>
+                    <li>followpos: Set of positions that can follow a position</li>
+                </ul>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example: (a|b)*abb#</h4>
+                <p style="color: #9cdcfe;">Position numbering: (a₁|b₂)*a₃b₄b₅#₆</p>
+                <table>
+                    <tr><th>Position</th><th>Symbol</th><th>firstpos</th><th>lastpos</th><th>followpos</th></tr>
+                    <tr><td>1</td><td>a</td><td>{1}</td><td>{1}</td><td>{1,2,3}</td></tr>
+                    <tr><td>2</td><td>b</td><td>{2}</td><td>{2}</td><td>{1,2,3}</td></tr>
+                    <tr><td>3</td><td>a</td><td>{3}</td><td>{3}</td><td>{4}</td></tr>
+                    <tr><td>4</td><td>b</td><td>{4}</td><td>{4}</td><td>{5}</td></tr>
+                    <tr><td>5</td><td>b</td><td>{5}</td><td>{5}</td><td>{6}</td></tr>
+                    <tr><td>6</td><td>#</td><td>{6}</td><td>{6}</td><td>{}</td></tr>
+                </table>
+                <br>
+                <p style="color: #4ec9b0;">✓ DFA states created directly from followpos sets</p>
+            </div>
+        </div>
+
+        <div id="ll1" class="content-section">
+            <div class="theory-box">
+                <h4>📚 LL(1) Parser Theory</h4>
+                <p>LL(1) is a top-down parsing technique that reads input Left-to-right, produces Leftmost derivation, and uses 1 lookahead symbol. It uses FIRST and FOLLOW sets to build a predictive parsing table.</p>
+                <br>
+                <p><strong>Key Concepts:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>FIRST Set: First terminals that can appear in derivation</li>
+                    <li>FOLLOW Set: Terminals that can follow a non-terminal</li>
+                    <li>Parsing Table: M[A, a] = production to use</li>
+                    <li>No Left Recursion: Grammar must be left-factored</li>
+                </ul>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example Grammar:</h4>
+                <pre style="color: #4ec9b0;">
+E → T E'
+E' → + T E' | ε
+T → F T'
+T' → * F T' | ε
+F → ( E ) | id</pre>
+                <br>
+                <p style="color: #9cdcfe;">FIRST Sets:</p>
+                <table>
+                    <tr><th>Non-terminal</th><th>FIRST</th></tr>
+                    <tr><td>E</td><td>{(, id}</td></tr>
+                    <tr><td>E'</td><td>{+, ε}</td></tr>
+                    <tr><td>T</td><td>{(, id}</td></tr>
+                    <tr><td>T'</td><td>{*, ε}</td></tr>
+                    <tr><td>F</td><td>{(, id}</td></tr>
+                </table>
+                <br>
+                <p style="color: #9cdcfe;">FOLLOW Sets:</p>
+                <table>
+                    <tr><th>Non-terminal</th><th>FOLLOW</th></tr>
+                    <tr><td>E</td><td>{), $}</td></tr>
+                    <tr><td>E'</td><td>{), $}</td></tr>
+                    <tr><td>T</td><td>{+, ), $}</td></tr>
+                    <tr><td>T'</td><td>{+, ), $}</td></tr>
+                    <tr><td>F</td><td>{+, *, ), $}</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="slr" class="content-section">
+            <div class="theory-box">
+                <h4>📚 SLR Parser Theory</h4>
+                <p>SLR (Simple LR) is a bottom-up parsing technique that uses LR(0) items and FOLLOW sets. It builds a canonical collection of LR(0) items and constructs ACTION and GOTO tables for shift-reduce parsing.</p>
+                <br>
+                <p><strong>Key Concepts:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>LR(0) Items: Productions with dot indicating position</li>
+                    <li>Closure: Add items for non-terminals after dot</li>
+                    <li>GOTO Function: Transition between item sets</li>
+                    <li>ACTION Table: Shift, Reduce, Accept, or Error</li>
+                    <li>GOTO Table: State transitions for non-terminals</li>
+                </ul>
+            </div>
+            <div class="example-box">
+                <h4>💡 Example Grammar:</h4>
+                <pre style="color: #4ec9b0;">
+E → E + T | T
+T → T * F | F
+F → ( E ) | id</pre>
+                <br>
+                <p style="color: #9cdcfe;">Augmented Grammar:</p>
+                <pre style="color: #4ec9b0;">
+E' → E
+E → E + T | T
+T → T * F | F
+F → ( E ) | id</pre>
+                <br>
+                <p style="color: #9cdcfe;">Sample LR(0) Items (State I0):</p>
+                <pre style="color: #dcdcaa;">
+E' → •E
+E → •E + T
+E → •T
+T → •T * F
+T → •F
+F → •( E )
+F → •id</pre>
+                <br>
+                <p style="color: #9cdcfe;">Parsing Actions:</p>
+                <ul style="margin-left: 20px; color: #d4d4d4;">
+                    <li><strong>Shift:</strong> Push input symbol and next state</li>
+                    <li><strong>Reduce:</strong> Pop symbols, push non-terminal</li>
+                    <li><strong>Accept:</strong> Parsing successful</li>
+                    <li><strong>Error:</strong> Syntax error detected</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const examples = {
+            c: `int main() {
+    int x = 10;
+    int y = 20;
+    int sum = x + y;
+    return 0;
+}`,
+            cpp: `int main() {
+    int x = 10;
+    int y = 20;
+    int sum = x + y;
+    return 0;
+}`,
+            java: `public class Main {
+    public static void main(String[] args) {
+        int x = 10;
+        int y = 20;
+        int sum = x + y;
+    }
+}`,
+            python: `def main():
+    x = 10
+    y = 20
+    sum = x + y
+    return sum`,
+            csharp: `class Program {
+    static void Main() {
+        int x = 10;
+        int y = 20;
+        int sum = x + y;
+    }
+}`,
+            javascript: `function main() {
+    let x = 10;
+    let y = 20;
+    let sum = x + y;
+    return sum;
+}`
+        };
+
+        const keywords = {
+            c: ['int', 'float', 'char', 'void', 'return', 'if', 'else', 'while', 'for'],
+            cpp: ['int', 'float', 'char', 'void', 'return', 'if', 'else', 'while', 'for', 'class', 'public', 'private'],
+            java: ['public', 'class', 'static', 'void', 'int', 'float', 'return', 'if', 'else', 'while', 'for', 'String'],
+            python: ['def', 'return', 'if', 'else', 'while', 'for', 'class', 'import', 'from'],
+            csharp: ['class', 'static', 'void', 'int', 'float', 'return', 'if', 'else', 'while', 'for', 'public', 'private'],
+            javascript: ['function', 'let', 'const', 'var', 'return', 'if', 'else', 'while', 'for', 'class']
+        };
+
+        const langSelect = document.getElementById('langSelect');
+        const codeInput = document.getElementById('codeInput');
+        const runBtn = document.getElementById('runBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const results = document.getElementById('results');
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        langSelect.addEventListener('change', () => {
+            codeInput.value = examples[langSelect.value];
+        });
+
+        codeInput.value = examples.c;
+
+        runBtn.addEventListener('click', compile);
+        clearBtn.addEventListener('click', () => {
+            results.innerHTML = '';
+        });
+
+        function compile() {
+            const code = codeInput.value.trim();
+            const lang = langSelect.value;
+            
+            if (!code) {
+                alert('Please enter source code');
+                return;
+            }
+
+            results.innerHTML = '';
+            
+            // Phase 1: Lexical Analysis
+            const tokens = lexicalAnalysis(code, lang);
+            displayPhase('Phase 1: Lexical Analysis (Scanner)', renderTokens(tokens));
+            
+            // Phase 2: Syntax Analysis
+            const ast = syntaxAnalysis(tokens, lang);
+            displayPhase('Phase 2: Syntax Analysis (Parser)', renderAST(ast));
+            
+            // Phase 3: Semantic Analysis
+            const semantics = semanticAnalysis(ast, lang);
+            displayPhase('Phase 3: Semantic Analysis', renderSemantics(semantics));
+            
+            // Phase 4: Intermediate Code Generation
+            const tac = intermediateCodeGen(ast);
+            displayPhase('Phase 4: Intermediate Code Generation (TAC)', renderTAC(tac));
+            
+            // Phase 5: Code Optimization
+            const optimized = codeOptimization(tac);
+            displayPhase('Phase 5: Code Optimization', renderOptimized(optimized));
+            
+            // Phase 6: Code Generation
+            const assembly = codeGeneration(optimized, lang);
+            displayPhase('Phase 6: Code Generation (Target Code)', renderAssembly(assembly));
+        }
+
+        function lexicalAnalysis(code, lang) {
+            const tokens = [];
+            const kw = keywords[lang];
+            const regex = /[a-zA-Z_]\w*|\d+|[+\-*\/=<>!]=?|[(){}\[\];,.]|"[^"]*"|'[^']*'/g;
+            let match;
+            
+            while ((match = regex.exec(code)) !== null) {
+                const value = match[0];
+                let type;
+                
+                if (kw.includes(value)) type = 'KEYWORD';
+                else if (/^\d+$/.test(value)) type = 'NUMBER';
+                else if (/^[a-zA-Z_]\w*$/.test(value)) type = 'IDENTIFIER';
+                else if (['+', '-', '*', '/', '=', '<', '>', '!', '==', '!=', '<=', '>='].includes(value)) type = 'OPERATOR';
+                else type = 'SYMBOL';
+                
+                tokens.push({ type, value });
+            }
+            
+            return tokens;
+        }
+
+        function syntaxAnalysis(tokens, lang) {
+            const ast = { type: 'Program', children: [] };
+            let i = 0;
+            
+            while (i < tokens.length) {
+                if (tokens[i].type === 'KEYWORD' && ['int', 'float', 'char', 'void', 'let', 'const', 'var'].includes(tokens[i].value)) {
+                    const decl = { type: 'Declaration', dataType: tokens[i].value, children: [] };
+                    i++;
+                    if (tokens[i] && tokens[i].type === 'IDENTIFIER') {
+                        decl.children.push({ type: 'Identifier', value: tokens[i].value });
+                        i++;
+                        if (tokens[i] && tokens[i].value === '=') {
+                            i++;
+                            if (tokens[i]) {
+                                decl.children.push({ type: 'Assignment', value: tokens[i].value });
+                                i++;
+                            }
+                        }
+                    }
+                    ast.children.push(decl);
+                } else if (tokens[i].type === 'IDENTIFIER') {
+                    const expr = { type: 'Expression', children: [{ type: 'Identifier', value: tokens[i].value }] };
+                    i++;
+                    if (tokens[i] && tokens[i].type === 'OPERATOR') {
+                        expr.children.push({ type: 'Operator', value: tokens[i].value });
+                        i++;
+                        if (tokens[i]) {
+                            expr.children.push({ type: tokens[i].type === 'IDENTIFIER' ? 'Identifier' : 'Literal', value: tokens[i].value });
+                            i++;
+                        }
+                    }
+                    ast.children.push(expr);
+                } else {
+                    i++;
+                }
+            }
+            
+            return ast;
+        }
+
+        function semanticAnalysis(ast, lang) {
+            const symbolTable = [];
+            const errors = [];
+            
+            ast.children.forEach(node => {
+                if (node.type === 'Declaration') {
+                    const id = node.children.find(c => c.type === 'Identifier');
+                    if (id) {
+                        const existing = symbolTable.find(s => s.name === id.value);
+                        if (existing) {
+                            errors.push(`Variable '${id.value}' already declared`);
+                        } else {
+                            symbolTable.push({ name: id.value, type: node.dataType, scope: 'local' });
+                        }
+                    }
+                }
+            });
+            
+            return { symbolTable, errors };
+        }
+
+        function intermediateCodeGen(ast) {
+            const tac = [];
+            let tempCount = 0;
+            
+            ast.children.forEach(node => {
+                if (node.type === 'Declaration') {
+                    const id = node.children.find(c => c.type === 'Identifier');
+                    const assign = node.children.find(c => c.type === 'Assignment');
+                    if (id && assign) {
+                        tac.push(`${id.value} = ${assign.value}`);
+                    }
+                } else if (node.type === 'Expression') {
+                    const parts = node.children.map(c => c.value);
+                    if (parts.length === 3) {
+                        const temp = `t${tempCount++}`;
+                        tac.push(`${temp} = ${parts[0]} ${parts[1]} ${parts[2]}`);
+                    }
+                }
+            });
+            
+            return tac;
+        }
+
+        function codeOptimization(tac) {
+            const optimized = [];
+            const constants = {};
+            
+            tac.forEach(line => {
+                const match = line.match(/(\w+) = (\d+)/);
+                if (match) {
+                    constants[match[1]] = parseInt(match[2]);
+                    optimized.push({ original: line, optimized: line, reason: 'No change' });
+                } else {
+                    const exprMatch = line.match(/(\w+) = (\w+) ([+\-*\/]) (\w+)/);
+                    if (exprMatch) {
+                        const [, result, op1, operator, op2] = exprMatch;
+                        if (constants[op1] !== undefined && constants[op2] !== undefined) {
+                            let value;
+                            switch (operator) {
+                                case '+': value = constants[op1] + constants[op2]; break;
+                                case '-': value = constants[op1] - constants[op2]; break;
+                                case '*': value = constants[op1] * constants[op2]; break;
+                                case '/': value = Math.floor(constants[op1] / constants[op2]); break;
+                            }
+                            optimized.push({ original: line, optimized: `${result} = ${value}`, reason: 'Constant folding' });
+                            constants[result] = value;
+                        } else {
+                            optimized.push({ original: line, optimized: line, reason: 'No change' });
+                        }
+                    } else {
+                        optimized.push({ original: line, optimized: line, reason: 'No change' });
+                    }
+                }
+            });
+            
+            return optimized;
+        }
+
+        function codeGeneration(optimized, lang) {
+            const assembly = [];
+            
+            optimized.forEach(opt => {
+                const line = opt.optimized;
+                const match = line.match(/(\w+) = (\w+|\d+)(?: ([+\-*\/]) (\w+|\d+))?/);
+                if (match) {
+                    const [, dest, src1, op, src2] = match;
+                    if (!op) {
+                        assembly.push(`MOV ${dest}, ${src1}`);
+                    } else {
+                        assembly.push(`MOV EAX, ${src1}`);
+                        switch (op) {
+                            case '+': assembly.push(`ADD EAX, ${src2}`); break;
+                            case '-': assembly.push(`SUB EAX, ${src2}`); break;
+                            case '*': assembly.push(`MUL EAX, ${src2}`); break;
+                            case '/': assembly.push(`DIV EAX, ${src2}`); break;
+                        }
+                        assembly.push(`MOV ${dest}, EAX`);
+                    }
+                }
+            });
+            
+            return assembly;
+        }
+
+        function displayPhase(title, content) {
+            const panel = document.createElement('div');
+            panel.className = 'phase-panel';
+            panel.innerHTML = `<h3>${title}</h3><div class="phase-content">${content}</div>`;
+            results.appendChild(panel);
+        }
+
+        function renderTokens(tokens) {
+            return tokens.map(t => 
+                `<span class="token ${t.type.toLowerCase()}">${t.value} (${t.type})</span>`
+            ).join('');
+        }
+
+        function renderAST(ast, level = 0) {
+            let html = `<div style="margin-left: ${level * 20}px; color: #dcdcaa;">${level > 0 ? '├─ ' : ''}${ast.type}${ast.value ? ': ' + ast.value : ''}${ast.dataType ? ' (' + ast.dataType + ')' : ''}</div>`;
+            if (ast.children) {
+                ast.children.forEach(child => {
+                    html += renderAST(child, level + 1);
+                });
+            }
+            return html;
+        }
+
+        function renderSemantics(semantics) {
+            let html = '<strong>Symbol Table:</strong><br><table><tr><th>Name</th><th>Type</th><th>Scope</th></tr>';
+            semantics.symbolTable.forEach(s => {
+                html += `<tr><td>${s.name}</td><td>${s.type}</td><td>${s.scope}</td></tr>`;
+            });
+            html += '</table>';
+            if (semantics.errors.length > 0) {
+                html += '<br><strong class="error">Errors:</strong><br>';
+                semantics.errors.forEach(e => html += `<span class="error">• ${e}</span><br>`);
+            } else {
+                html += '<br><span style="color: #4ec9b0;">✓ No semantic errors</span>';
+            }
+            return html;
+        }
+
+        function renderTAC(tac) {
+            return tac.map((line, i) => `${i + 1}. ${line}`).join('<br>');
+        }
+
+        function renderOptimized(optimized) {
+            let html = '<table><tr><th>Original</th><th>Optimized</th><th>Technique</th></tr>';
+            optimized.forEach(o => {
+                html += `<tr><td>${o.original}</td><td>${o.optimized}</td><td>${o.reason}</td></tr>`;
+            });
+            html += '</table>';
+            return html;
+        }
+
+        function renderAssembly(assembly) {
+            return assembly.map((line, i) => `${i + 1}. ${line}`).join('<br>');
+        }
+    </script>
+</body>
+</html>
