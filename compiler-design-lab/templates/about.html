@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}About - Compiler Design Lab{% endblock %}
+{% block content %}
+<style>
+    .about-hero { background: linear-gradient(135deg, #1a73e8, #1a1a2e); color: white; border-radius: 14px; padding: 48px 40px; margin-bottom: 32px; }
+    .about-hero h1 { font-size: 32px; font-weight: 700; margin-bottom: 10px; }
+    .about-hero p { font-size: 16px; opacity: .85; max-width: 600px; }
+    .info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-bottom: 32px; }
+    @media(max-width:800px){ .info-grid { grid-template-columns: 1fr; } }
+    .info-card { background: white; border: 1px solid #e8e8e8; border-radius: 12px; padding: 24px; text-align: center; }
+    .info-card .icon { font-size: 36px; margin-bottom: 12px; }
+    .info-card h5 { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+    .info-card p { font-size: 13.5px; color: #777; line-height: 1.6; }
+    .section-card { background: white; border: 1px solid #e8e8e8; border-radius: 12px; padding: 28px 32px; margin-bottom: 20px; }
+    .section-card h4 { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px; }
+    .module-list { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+    @media(max-width:600px){ .module-list { grid-template-columns: 1fr; } }
+    .module-item { background: #f8f9ff; border-radius: 8px; padding: 10px 14px; font-size: 13.5px; color: #333; border-left: 3px solid #1a73e8; }
+    .tech-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tech-badge { background: #e8f0fe; color: #1a73e8; padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+    .contact-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; color: #555; }
+    .contact-row:last-child { border-bottom: none; }
+    .contact-row span:first-child { font-size: 20px; width: 32px; }
+</style>
+
+<div class="about-hero">
+    <h1>⚙ About Compiler Design Lab</h1>
+    <p>An interactive virtual lab for learning every phase of compiler design — from lexical analysis to code generation.</p>
+</div>
+
+<div class="info-grid">
+    <div class="info-card">
+        <div class="icon">🎓</div>
+        <h5>Educational</h5>
+        <p>Designed for students and educators studying compiler construction and formal language theory.</p>
+    </div>
+    <div class="info-card">
+        <div class="icon">🔬</div>
+        <h5>Interactive</h5>
+        <p>Step-by-step visualization of parsing algorithms, automata, and code generation techniques.</p>
+    </div>
+    <div class="info-card">
+        <div class="icon">🚀</div>
+        <h5>Comprehensive</h5>
+        <p>Covers all 16 modules across lexical analysis, syntax parsing, optimization, and advanced topics.</p>
+    </div>
+</div>
+
+<div class="section-card">
+    <h4>📚 Available Modules</h4>
+    <div class="module-list">
+        <div class="module-item">1. Regex to NFA</div>
+        <div class="module-item">2. NFA to DFA</div>
+        <div class="module-item">3. Direct DFA</div>
+        <div class="module-item">4. DFA Minimization</div>
+        <div class="module-item">5. Lexical Analyzer</div>
+        <div class="module-item">6. LL(1) Parser</div>
+        <div class="module-item">7. SLR Parser</div>
+        <div class="module-item">8. Three Address Code</div>
+        <div class="module-item">9. Code Optimization</div>
+        <div class="module-item">10. Code Generation</div>
+        <div class="module-item">11. Compiler Phases</div>
+        <div class="module-item">12. CLR Parser</div>
+        <div class="module-item">13. LALR Parser</div>
+        <div class="module-item">14. SDD</div>
+        <div class="module-item">15. SDT</div>
+        <div class="module-item">16. Expression Translation</div>
+    </div>
+</div>
+
+<div class="section-card">
+    <h4>🛠 Built With</h4>
+    <div class="tech-badges">
+        <span class="tech-badge">Python</span>
+        <span class="tech-badge">Flask</span>
+        <span class="tech-badge">Bootstrap 5</span>
+        <span class="tech-badge">Graphviz</span>
+        <span class="tech-badge">Pandas</span>
+        <span class="tech-badge">HTML / CSS / JS</span>
+    </div>
+</div>
+
+<div class="section-card">
+    <h4>📬 Contact</h4>
+    <div class="contact-row"><span>✉</span><span>support@compilerlab.dev</span></div>
+    <div class="contact-row"><span>🏠</span><span>institute@compilerlab.dev</span></div>
+    <div class="contact-row"><span>📍</span><span>Jamnagar, Gujarat</span></div>
+    <div class="contact-row"><span>📞</span><span>+91 98765 43210</span></div>
+</div>
+{% endblock %}

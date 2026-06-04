@@ -1,0 +1,42 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f2f5;
+}
+
+/* Cards in module pages */
+.card {
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #1a73e8;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.table { background-color: white; }
+.table thead th { background-color: #343a40; color: white; }
+
+svg { max-width: 100%; height: auto; }
+
+pre {
+    background-color: #f4f4f4;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.btn-primary { background-color: #1a73e8; border: none; }
+.btn-primary:hover { background-color: #1557b0; }
+
+h1, h2 { color: #1a1a2e; }
+.lead { color: #6c757d; }
+
+.form-control:focus {
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 0.2rem rgba(26,115,232,.2);
+}

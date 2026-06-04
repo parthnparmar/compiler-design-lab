@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}SLR Parser - Compiler Design Virtual Lab{% endblock %}
+
+{% block content %}
+<h2>SLR Parser</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="grammar" class="form-label">Enter Grammar (one production per line):</label>
+                <textarea class="form-control" id="grammar" name="grammar" rows="5" required>{{ grammar or 'E -> E + T | T\nT -> T * F | F\nF -> ( E ) | id' }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="input_string" class="form-label">Input String (space-separated tokens):</label>
+                <input type="text" class="form-control" id="input_string" name="input_string" 
+                       placeholder="e.g., id + id * id  (tokens must be space-separated)" value="{{ input_string or '' }}">
+                <small class="text-muted">Each token must be separated by a space: <code>id + id * id</code> not <code>id+id*id</code></small>
+            </div>
+            <button type="submit" class="btn btn-primary">Parse</button>
+        </form>
+    </div>
+</div>
+
+{% if aug_grammar %}
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #007bff; color: white;">
+        <strong>█ STEP 1: AUGMENTED GRAMMAR</strong>
+    </div>
+    <div class="card-body">
+        {{ aug_grammar|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #28a745; color: white;">
+        <strong>█ STEP 2: CANONICAL COLLECTION OF LR(0) ITEMS</strong>
+    </div>
+    <div class="card-body">
+        {{ items|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #ffc107; color: black;">
+        <strong>█ STEP 3: FOLLOW SETS</strong>
+    </div>
+    <div class="card-body">
+        {{ follow_sets|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #17a2b8; color: white;">
+        <strong>█ STEP 4: SLR PARSING TABLE (ACTION + GOTO)</strong>
+    </div>
+    <div class="card-body">
+        {{ action_table|safe }}
+    </div>
+</div>
+
+{% if steps %}
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #6c757d; color: white;">
+        <strong>█ STEP 5: PARSING STEPS</strong>
+    </div>
+    <div class="card-body">
+        {{ steps|safe }}
+    </div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

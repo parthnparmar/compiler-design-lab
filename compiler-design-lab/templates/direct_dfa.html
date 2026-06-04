@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Direct DFA - Compiler Design Virtual Lab{% endblock %}
+
+{% block content %}
+<h2>Direct DFA Construction (Syntax Tree Method)</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="regex" class="form-label">Enter Regular Expression:</label>
+                <input type="text" class="form-control" id="regex" name="regex" 
+                       placeholder="e.g., (a|b)*abb" value="{{ regex or '' }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Construct DFA</button>
+        </form>
+    </div>
+</div>
+
+{% if tree_diagram %}
+<div class="card mt-3">
+    <div class="card-header"><strong>Syntax Tree</strong></div>
+    <div class="card-body text-center">
+        {{ tree_diagram|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header"><strong>followpos Table</strong></div>
+    <div class="card-body">
+        {{ followpos_table|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header"><strong>DFA Transition Table</strong></div>
+    <div class="card-body">
+        {{ dfa_table|safe }}
+    </div>
+</div>
+
+{% if dfa_diagram %}
+<div class="card mt-3">
+    <div class="card-header"><strong>DFA Diagram</strong></div>
+    <div class="card-body text-center">
+        {{ dfa_diagram|safe }}
+    </div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

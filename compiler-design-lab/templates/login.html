@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Login - Compiler Design Lab{% endblock %}
+{% block content %}
+<style>
+  .login-wrap{display:flex;justify-content:center;align-items:flex-start;padding-top:40px}
+  .login-box{background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+  .login-logo{text-align:center;margin-bottom:24px}
+  .gear-icon{background:#1a73e8;color:#fff;border-radius:10px;width:52px;height:52px;display:inline-flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:10px}
+  .form-label{font-size:13.5px;font-weight:600;color:#333;margin-bottom:6px;display:block}
+  .form-control{border-radius:8px;border:1px solid #ddd;font-size:14px;padding:10px 14px;width:100%}
+  .form-control:focus{border-color:#1a73e8;box-shadow:0 0 0 3px rgba(26,115,232,.15);outline:none}
+  .btn-login-submit{background:#1a73e8;color:#fff;border:none;width:100%;padding:11px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:.2s;margin-top:4px}
+  .btn-login-submit:hover{background:#1557b0}
+  .alert-error{background:#fef2f2;border:1px solid #fca5a5;color:#b91c1c;border-radius:8px;padding:10px 14px;font-size:13.5px;margin-bottom:16px}
+  .alert-success{background:#f0fdf4;border:1px solid #86efac;color:#166534;border-radius:8px;padding:10px 14px;font-size:13.5px;margin-bottom:16px}
+  .hint-text{text-align:center;font-size:12.5px;color:#aaa;margin-top:16px}
+  .hint-text a{color:#1a73e8;text-decoration:none}
+  .forgot-link{text-align:right;font-size:12.5px;margin-top:4px}
+  .forgot-link a{color:#1a73e8;text-decoration:none}
+  .mb-3{margin-bottom:16px} .mb-4{margin-bottom:20px}
+</style>
+<div class="login-wrap">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="gear-icon">⚙</div>
+      <h4 style="font-size:20px;font-weight:700;color:#1a1a2e;margin:0">Compiler Design Lab</h4>
+      <p style="font-size:13px;color:#999;margin:4px 0 0">Sign in to your account</p>
+    </div>
+    {% if error %}<div class="alert-error">⚠ {{ error }}</div>{% endif %}
+    <form method="POST" action="/login">
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" name="username" class="form-control" placeholder="Enter username" required>
+      </div>
+      <div class="mb-4">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+        <div class="forgot-link"><a href="/forgot-password">Forgot password?</a></div>
+      </div>
+      <div style="margin-bottom:16px;display:flex;align-items:center;gap:8px">
+        <input type="checkbox" name="remember" id="remember">
+        <label for="remember" style="font-size:13px;color:#555;cursor:pointer">Remember me</label>
+      </div>
+      <button type="submit" class="btn-login-submit">Login</button>
+    </form>
+    <div class="hint-text" style="margin-top:16px">
+      Don't have an account? <a href="/register">Register here</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

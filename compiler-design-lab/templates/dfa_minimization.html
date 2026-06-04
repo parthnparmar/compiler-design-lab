@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}DFA Minimization - Compiler Design Virtual Lab{% endblock %}
+
+{% block content %}
+<h2>DFA Minimization (Partition Refinement)</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="regex" class="form-label">Enter Regular Expression:</label>
+                <input type="text" class="form-control" id="regex" name="regex" 
+                       placeholder="e.g., (a|b)*abb" value="{{ regex or '' }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Minimize DFA</button>
+        </form>
+    </div>
+</div>
+
+{% if partition_steps %}
+<div class="card mt-3">
+    <div class="card-header"><strong>Partition Refinement Steps</strong></div>
+    <div class="card-body">
+        {{ partition_steps|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header"><strong>Minimized DFA Transition Table</strong></div>
+    <div class="card-body">
+        {{ min_table|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header"><strong>Minimized DFA Diagram</strong></div>
+    <div class="card-body text-center">
+        {{ diagram|safe }}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

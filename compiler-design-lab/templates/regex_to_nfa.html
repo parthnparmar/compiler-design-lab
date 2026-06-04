@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Regex to NFA - Compiler Design Virtual Lab{% endblock %}
+
+{% block content %}
+<h2>Regular Expression to NFA (Thompson's Construction)</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="regex" class="form-label">Enter Regular Expression:</label>
+                <input type="text" class="form-control" id="regex" name="regex" 
+                       placeholder="e.g., (a|b)*abb" value="{{ regex or '' }}" required>
+                <small class="form-text text-muted">Use | for OR, * for Kleene star, () for grouping</small>
+            </div>
+            <button type="submit" class="btn btn-primary">Generate NFA</button>
+        </form>
+    </div>
+</div>
+
+{% if postfix %}
+<div class="card mt-3">
+    <div class="card-header"><strong>Postfix Expression</strong></div>
+    <div class="card-body">
+        <p class="lead">{{ postfix }}</p>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header"><strong>NFA States</strong></div>
+    <div class="card-body">
+        <p><strong>Start State:</strong> {{ start }}</p>
+        <p><strong>Final State:</strong> {{ end }}</p>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header"><strong>NFA Transition Table</strong></div>
+    <div class="card-body">
+        {{ table|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header"><strong>NFA Diagram</strong></div>
+    <div class="card-body text-center">
+        {{ diagram|safe }}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Compiler Design Virtual Lab{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* TOP NAVBAR */
+        .top-navbar {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 4px rgba(0,0,0,.08);
+        }
+        .top-navbar .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; color: #1a1a2e; }
+        .top-navbar .brand .gear { background: #1a73e8; color: white; border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .top-navbar .nav-links { display: flex; align-items: center; gap: 4px; }
+        .top-navbar .nav-links a { padding: 6px 14px; border-radius: 6px; color: #444; text-decoration: none; font-size: 14px; border: 1px solid transparent; transition: .2s; }
+        .top-navbar .nav-links a.active, .top-navbar .nav-links a:hover { border-color: #ccc; background: #f5f5f5; }
+        .top-navbar .nav-links .btn-login { background: #1a73e8; color: white; border: none; padding: 7px 18px; border-radius: 7px; font-weight: 600; }
+        .top-navbar .nav-links .btn-login:hover { background: #1557b0; }
+
+        /* LAYOUT */
+        .app-body { display: flex; flex: 1; overflow: hidden; }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 220px;
+            background: white;
+            border-right: 1px solid #e8e8e8;
+            overflow-y: auto;
+            flex-shrink: 0;
+            padding: 16px 0;
+            border-left: 3px solid #1a73e8;
+        }
+        .sidebar a { display: block; padding: 8px 20px; color: #555; text-decoration: none; font-size: 13.5px; transition: .2s; }
+        .sidebar a:hover, .sidebar a.active { color: #1a73e8; background: #f0f6ff; }
+        .sidebar a.active { font-weight: 600; }
+        .sidebar .section-label { padding: 12px 20px 4px; font-size: 11px; font-weight: 700; color: #999; letter-spacing: .8px; text-transform: uppercase; }
+
+        /* MAIN */
+        .main-content { flex: 1; overflow-y: auto; padding: 28px 32px; }
+
+        /* ORIENTATION */
+        .orientation-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #212529; color: white; justify-content: center; align-items: center; flex-direction: column; z-index: 9999; }
+        @media (max-width: 768px) and (orientation: portrait) {
+            .sidebar, .main-content { display: none !important; }
+            .orientation-screen { display: flex !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="orientation-screen">
+    <h3>Please Rotate Your Device</h3>
+    <p>This application works best in landscape mode</p>
+</div>
+
+<!-- TOP NAVBAR -->
+<nav class="top-navbar">
+    <div class="brand">
+        <div class="gear">⚙</div>
+        Compiler Design Lab
+    </div>
+    <div class="nav-links">
+        <a href="/" class="active">🏠 Home</a>
+        <a href="/about">ℹ About</a>
+        <a href="/help">❓ Help</a>
+        {% if current_user.is_authenticated %}
+        <a href="/profile">👤 {{ current_user.firstname }}</a>
+        <a href="/logout" class="btn-login" style="background:#e53935">Logout</a>
+        {% else %}
+        <a href="/register">Register</a>
+        <a href="/login" class="btn-login">Login</a>
+        {% endif %}
+    </div>
+</nav>
+
+<div class="app-body">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <a href="/" class="active">🏠 Home</a>
+        <a href="#">ℹ About us</a>
+
+        <div class="section-label">Lexical</div>
+        <a href="/regex-to-nfa">1&nbsp;&nbsp; Regex to NFA</a>
+        <a href="/nfa-to-dfa">2&nbsp;&nbsp; NFA to DFA</a>
+        <a href="/direct-dfa">3&nbsp;&nbsp; Direct DFA</a>
+        <a href="/dfa-minimization">4&nbsp;&nbsp; DFA Minimization</a>
+        <a href="/lexical-analyzer">5&nbsp;&nbsp; Lexical Analyzer</a>
+
+        <div class="section-label">Syntax</div>
+        <a href="/ll1-parser">6&nbsp;&nbsp; LL(1) Parser</a>
+        <a href="/slr-parser">7&nbsp;&nbsp; SLR Parser</a>
+        <a href="/clr-parser">12 &nbsp;CLR Parser</a>
+        <a href="/lalr-parser">13 &nbsp;LALR Parser</a>
+
+        <div class="section-label">Code</div>
+        <a href="/three-address-code">8&nbsp;&nbsp; Three Address Code</a>
+        <a href="/code-optimization">9&nbsp;&nbsp; Code Optimization</a>
+        <a href="/code-generation">10 &nbsp;Code Generation</a>
+
+        <div class="section-label">Advanced</div>
+        <a href="/compiler_phases.html">11 &nbsp;Compiler Phases</a>
+        <a href="/sdd">14 &nbsp;SDD</a>
+        <a href="/sdt">15 &nbsp;SDT</a>
+        <a href="/expr-translation">16 &nbsp;Expression Translation</a>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

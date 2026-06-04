@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Code Generation - Compiler Design Virtual Lab{% endblock %}
+
+{% block content %}
+<h2>Code Generation</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="expression" class="form-label">Enter Expression:</label>
+                <input type="text" class="form-control" id="expression" name="expression" 
+                       placeholder="e.g., a = b * c + d" value="{{ expression or '' }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Generate Code</button>
+        </form>
+    </div>
+</div>
+
+{% if tac %}
+<div class="card mt-3">
+    <div class="card-header"><strong>Three Address Code</strong></div>
+    <div class="card-body">
+        <pre>{{ tac|safe }}</pre>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header"><strong>Assembly Code</strong></div>
+    <div class="card-body">
+        <pre>{{ assembly|safe }}</pre>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

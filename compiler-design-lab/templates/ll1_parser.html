@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}LL(1) Parser - Compiler Design Virtual Lab{% endblock %}
+
+{% block content %}
+<h2>LL(1) Parser</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="grammar" class="form-label">Enter Grammar (one production per line):</label>
+                <textarea class="form-control" id="grammar" name="grammar" rows="5" required>{{ grammar or 'E -> T E1\nE1 -> + T E1 | ε\nT -> F T1\nT1 -> * F T1 | ε\nF -> ( E ) | id' }}</textarea>
+                <small class="form-text text-muted">Use ε for epsilon, | for alternatives</small>
+            </div>
+            <div class="mb-3">
+                <label for="start_symbol" class="form-label">Start Symbol:</label>
+                <input type="text" class="form-control" id="start_symbol" name="start_symbol" 
+                       value="{{ start_symbol or 'E' }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="input_string" class="form-label">Input String (optional):</label>
+                <input type="text" class="form-control" id="input_string" name="input_string" 
+                       placeholder="e.g., id + id * id" value="{{ input_string or '' }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Parse</button>
+        </form>
+    </div>
+</div>
+
+{% if original_grammar %}
+<div class="card mt-3">
+    <div class="card-header"><strong>Step 1: Original Grammar</strong></div>
+    <div class="card-body">
+        {{ original_grammar|safe }}
+    </div>
+</div>
+{% endif %}
+
+{% if left_recursion_grammar %}
+<div class="card mt-3">
+    <div class="card-header">
+        <strong>Step 2: After Removing Left Recursion</strong>
+        {% if has_left_recursion %}
+        <span class="badge bg-warning text-dark">Modified</span>
+        {% else %}
+        <span class="badge bg-success">No Left Recursion</span>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {{ left_recursion_grammar|safe }}
+    </div>
+</div>
+{% endif %}
+
+{% if left_factoring_grammar %}
+<div class="card mt-3">
+    <div class="card-header">
+        <strong>Step 3: After Left Factoring</strong>
+        {% if has_left_factoring %}
+        <span class="badge bg-warning text-dark">Modified</span>
+        {% else %}
+        <span class="badge bg-success">No Left Factoring Needed</span>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {{ left_factoring_grammar|safe }}
+    </div>
+</div>
+{% endif %}
+
+{% if first_table %}
+<div class="card mt-3">
+    <div class="card-header"><strong>Step 4: FIRST Sets</strong></div>
+    <div class="card-body">
+        {{ first_table|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header"><strong>Step 5: FOLLOW Sets</strong></div>
+    <div class="card-body">
+        {{ follow_table|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header"><strong>Step 6: LL(1) Parsing Table</strong></div>
+    <div class="card-body">
+        {{ parsing_table|safe }}
+    </div>
+</div>
+
+{% if steps %}
+<div class="card mt-3">
+    <div class="card-header"><strong>Step 7: Parsing Steps</strong></div>
+    <div class="card-body">
+        {{ steps|safe }}
+    </div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

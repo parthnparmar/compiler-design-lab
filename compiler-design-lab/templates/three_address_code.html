@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Three Address Code - Compiler Design Virtual Lab{% endblock %}
+
+{% block content %}
+<h2>Three Address Code Generator</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="expression" class="form-label">Enter Expression:</label>
+                <input type="text" class="form-control" id="expression" name="expression" 
+                       placeholder="e.g., a = b * c + d / e" value="{{ expression or '' }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Generate TAC</button>
+        </form>
+    </div>
+</div>
+
+{% if tac %}
+<div class="card mt-3">
+    <div class="card-header"><strong>Three Address Code</strong></div>
+    <div class="card-body">
+        <pre>{{ tac|safe }}</pre>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header"><strong>Quadruples</strong></div>
+    <div class="card-body">
+        {{ quadruples|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header"><strong>Triples</strong></div>
+    <div class="card-body">
+        {{ triples|safe }}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

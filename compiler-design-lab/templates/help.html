@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Help - Compiler Design Lab{% endblock %}
+{% block content %}
+<style>
+    .help-hero { background: linear-gradient(135deg, #f97316, #1a1a2e); color: white; border-radius: 14px; padding: 40px 36px; margin-bottom: 28px; }
+    .help-hero h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .help-hero p { font-size: 15px; opacity: .85; }
+    .help-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; margin-bottom: 28px; }
+    @media(max-width:700px){ .help-grid { grid-template-columns: 1fr; } }
+    .help-card { background: white; border: 1px solid #e8e8e8; border-radius: 12px; padding: 22px 24px; }
+    .help-card h5 { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .help-card p, .help-card li { font-size: 13.5px; color: #666; line-height: 1.7; }
+    .help-card ul { padding-left: 18px; margin: 0; }
+    .faq-section { background: white; border: 1px solid #e8e8e8; border-radius: 12px; padding: 28px 32px; }
+    .faq-section h4 { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px; }
+    .faq-item { border-bottom: 1px solid #f0f0f0; padding: 14px 0; }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q { font-size: 14px; font-weight: 600; color: #1a1a2e; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-a { font-size: 13.5px; color: #666; margin-top: 8px; line-height: 1.6; display: none; }
+    .faq-item.open .faq-a { display: block; }
+    .faq-item.open .arrow { transform: rotate(180deg); }
+    .arrow { transition: transform .2s; display: inline-block; }
+    code { background: #f0f6ff; color: #1a73e8; padding: 2px 7px; border-radius: 4px; font-size: 12.5px; }
+</style>
+
+<div class="help-hero">
+    <h1>❓ Help & Documentation</h1>
+    <p>Quick guides to get you started with each module in Compiler Design Lab.</p>
+</div>
+
+<div class="help-grid">
+    <div class="help-card">
+        <h5>🔤 Lexical Modules</h5>
+        <ul>
+            <li>Enter a regex like <code>a(b|c)*</code> for NFA/DFA modules</li>
+            <li>Lexical Analyzer accepts full source code snippets</li>
+            <li>Results show transition tables and state diagrams</li>
+        </ul>
+    </div>
+    <div class="help-card">
+        <h5>📐 Parser Modules</h5>
+        <ul>
+            <li>Enter grammar rules like <code>E -> E + T | T</code></li>
+            <li>Use <code>ε</code> for empty (epsilon) productions</li>
+            <li>Non-terminals: uppercase; Terminals: lowercase/symbols</li>
+            <li>Enter test string space-separated: <code>id + id * id</code></li>
+        </ul>
+    </div>
+    <div class="help-card">
+        <h5>💻 Code Modules</h5>
+        <ul>
+            <li>Enter arithmetic expressions: <code>x = b - c * 2</code></li>
+            <li>Three Address Code shows TAC, Quadruples, Triples</li>
+            <li>Code Generation produces assembly-like output</li>
+        </ul>
+    </div>
+    <div class="help-card">
+        <h5>⚙ Advanced Modules</h5>
+        <ul>
+            <li>SDD/SDT: enter expressions for attribute evaluation</li>
+            <li>Compiler Phases: shows all 6 phases end-to-end</li>
+            <li>Expression Translation: Quadruples, Triples, Indirect Triples</li>
+        </ul>
+    </div>
+</div>
+
+<div class="faq-section">
+    <h4>💬 Frequently Asked Questions</h4>
+
+    <div class="faq-item">
+        <div class="faq-q" onclick="toggle(this)">What grammar format is accepted? <span class="arrow">▼</span></div>
+        <div class="faq-a">Use <code>-></code> to separate LHS from RHS, and <code>|</code> for multiple productions. Example: <code>E -> T E' | T</code>. Use <code>ε</code> for epsilon.</div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-q" onclick="toggle(this)">Why does it say "Grammar is not LL(1)"? <span class="arrow">▼</span></div>
+        <div class="faq-a">The grammar may have left recursion or common prefixes. Remove left recursion and apply left factoring before using LL(1) parser. The tool does this automatically.</div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-q" onclick="toggle(this)">What is the difference between SLR, CLR, and LALR? <span class="arrow">▼</span></div>
+        <div class="faq-a">SLR uses FOLLOW sets for reductions. CLR (Canonical LR) uses precise lookaheads per item — most powerful but largest tables. LALR merges CLR states with same LR(0) core — a good balance between power and size.</div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-q" onclick="toggle(this)">How do I enter tokens for parsing? <span class="arrow">▼</span></div>
+        <div class="faq-a">Enter space-separated tokens. Example: <code>id + id * id</code>. The <code>$</code> end-marker is added automatically.</div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-q" onclick="toggle(this)">Which module should I use first? <span class="arrow">▼</span></div>
+        <div class="faq-a">Follow the numbered order: start with Regex to NFA (1), then NFA to DFA (2), then parsers (6–13), then code modules (8–10). The Compiler Phases module (11) gives a full end-to-end view.</div>
+    </div>
+</div>
+
+<script>
+function toggle(el) {
+    el.parentElement.classList.toggle('open');
+}
+</script>
+{% endblock %}

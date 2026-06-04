@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Expression Translation - Compiler Design Virtual Lab{% endblock %}
+
+{% block content %}
+<h2>Translation of Expressions</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <form method="POST" action="/expr-translation">
+            <div class="mb-3">
+                <label for="expression" class="form-label">Input Expression:</label>
+                <input type="text" class="form-control" id="expression" name="expression"
+                       required
+                       placeholder="e.g.  a + b * c - d  or  2 * 3 + 4"
+                       value="{{ expression or '' }}">
+                <small class="text-muted">Supports: <code>+ - * /</code> and parentheses. Example: <code>a + b * c - d</code></small>
+            </div>
+            <button type="submit" class="btn btn-primary">Translate</button>
+        </form>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger mt-3"><strong>Error:</strong> {{ error }}</div>
+{% endif %}
+
+{% if quad_table %}
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #007bff; color: white;">
+        <strong>█ STEP 1: THREE ADDRESS CODE for "{{ expression }}"</strong>
+    </div>
+    <div class="card-body">
+        {{ steps_table|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #28a745; color: white;">
+        <strong>█ STEP 2: QUADRUPLES</strong>
+    </div>
+    <div class="card-body">
+        {{ quad_table|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #17a2b8; color: white;">
+        <strong>█ STEP 3: TRIPLES</strong>
+    </div>
+    <div class="card-body">
+        {{ triple_table|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #ffc107; color: black;">
+        <strong>█ STEP 4: INDIRECT TRIPLES</strong>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <p class="fw-semibold mb-1">Pointer Table</p>
+                {{ pointer_table|safe }}
+            </div>
+            <div class="col-md-8">
+                <p class="fw-semibold mb-1">Triples</p>
+                {{ indirect_triple_table|safe }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-success mt-3 text-center fw-bold fs-5">
+    ✅ Result stored in: <code>{{ result }}</code>
+</div>
+
+{% endif %}
+{% endblock %}

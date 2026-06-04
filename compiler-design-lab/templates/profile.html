@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Profile - Compiler Design Lab{% endblock %}
+{% block content %}
+<style>
+  .wrap{display:flex;justify-content:center;padding-top:40px}
+  .box{background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:40px 36px;width:100%;max-width:480px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+  .avatar{width:80px;height:80px;background:#1a73e8;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:32px;font-weight:700;margin:0 auto 16px}
+  .info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
+  .info-label{color:#888;font-weight:600}
+  .info-value{color:#1a1a2e}
+  .btn-logout{background:#e53935;color:#fff;border:none;width:100%;padding:11px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;text-decoration:none;display:block;text-align:center}
+  .btn-logout:hover{background:#c62828;color:#fff}
+</style>
+<div class="wrap">
+  <div class="box">
+    <div class="avatar">{{ user.firstname[0] | upper }}</div>
+    <h4 style="text-align:center;font-size:20px;font-weight:700;color:#1a1a2e;margin:0 0 4px">{{ user.firstname }} {{ user.lastname }}</h4>
+    <p style="text-align:center;color:#999;font-size:13px;margin:0 0 24px">@{{ user.username }}</p>
+    <div class="info-row"><span class="info-label">First Name</span><span class="info-value">{{ user.firstname }}</span></div>
+    <div class="info-row"><span class="info-label">Last Name</span><span class="info-value">{{ user.lastname }}</span></div>
+    <div class="info-row"><span class="info-label">Username</span><span class="info-value">{{ user.username }}</span></div>
+    <div class="info-row"><span class="info-label">Email</span><span class="info-value">{{ user.email }}</span></div>
+    <div class="info-row"><span class="info-label">Member Since</span><span class="info-value">{{ user.created_at.strftime('%d %b %Y') }}</span></div>
+    <a href="/logout" class="btn-logout">Logout</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}CLR Parser - Compiler Design Virtual Lab{% endblock %}
+
+{% block content %}
+<h2>CLR Parser</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="grammar" class="form-label">Enter Grammar (one production per line):</label>
+                <textarea class="form-control" id="grammar" name="grammar" rows="5" required>{{ grammar or 'S -> C C\nC -> c C | d' }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="input_string" class="form-label">Input String:</label>
+                <input type="text" class="form-control" id="input_string" name="input_string"
+                       placeholder="e.g., c c d d  or  ccd d  or  cdd"
+                       value="{{ input_string or '' }}">
+                <small class="text-muted">Spaces are optional — <code>ccd</code> and <code>c c d</code> both work.</small>
+            </div>
+            <button type="submit" class="btn btn-primary">Parse</button>
+        </form>
+    </div>
+</div>
+
+{% if aug_grammar %}
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #007bff; color: white;">
+        <strong>█ STEP 1: AUGMENTED GRAMMAR</strong>
+    </div>
+    <div class="card-body">
+        {{ aug_grammar|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #28a745; color: white;">
+        <strong>█ STEP 2: CANONICAL COLLECTION OF CLR(1) ITEMS</strong>
+    </div>
+    <div class="card-body">
+        {{ items|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #17a2b8; color: white;">
+        <strong>█ STEP 3: CLR PARSING TABLE (ACTION + GOTO)</strong>
+    </div>
+    <div class="card-body">
+        {% if conflicts %}
+        <div class="alert alert-warning">
+            <strong>⚠️ Conflicts detected — grammar may not be CLR(1):</strong>
+            <ul class="mb-0 mt-1">
+                {% for c in conflicts %}<li>{{ c }}</li>{% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {{ action_table|safe }}
+    </div>
+</div>
+
+{% if steps %}
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #6c757d; color: white;">
+        <strong>█ STEP 4: PARSING STEPS</strong>
+    </div>
+    <div class="card-body">
+        {{ steps|safe }}
+    </div>
+</div>
+
+<div class="alert {% if accepted %}alert-success{% else %}alert-danger{% endif %} mt-3 text-center fw-bold fs-5">
+    {% if accepted %}
+        ✅ String <code>{{ input_string }}</code> is <strong>ACCEPTED</strong>.
+    {% else %}
+        ❌ String <code>{{ input_string }}</code> is <strong>REJECTED</strong>.
+    {% endif %}
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

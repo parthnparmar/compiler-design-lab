@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}SDT - Compiler Design Virtual Lab{% endblock %}
+
+{% block content %}
+<h2>Syntax Directed Translation (SDT)</h2>
+
+<style>
+.tree { --spacing: 1.4rem; --radius: 8px; }
+.tree li { display: block; position: relative; padding-left: calc(2*var(--spacing) - var(--radius) - 2px); }
+.tree ul { margin-left: calc(var(--radius) - var(--spacing)); padding-left: 0; }
+.tree ul li { border-left: 2px solid #adb5bd; }
+.tree ul li:last-child { border-color: transparent; }
+.tree ul li::before { content:''; display:block; position:absolute; top:calc(var(--spacing)/2 - 1px); left:-2px; width:calc(var(--spacing) + 2px); height:calc(var(--spacing) + 1px); border:solid #adb5bd; border-width:0 0 2px 2px; }
+.tree-node { display:inline-block; background:#fff3cd; border:1px solid #ffc107; border-radius:6px; padding:3px 10px; font-family:monospace; font-size:0.88rem; }
+</style>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Grammar with Embedded Translation Actions:</label>
+                <pre class="border rounded p-2 bg-light mb-0">E → E + T  { emit(t = E.place + T.place); E.place = t }
+E → T      { E.place = T.place }
+T → T * F  { emit(t = T.place * F.place); T.place = t }
+T → F      { T.place = F.place }
+F → ( E )  { F.place = E.place }
+F → id     { F.place = id.name }
+F → num    { F.place = num.val }</pre>
+            </div>
+            <div class="mb-3">
+                <label for="expression" class="form-label">Input Expression:</label>
+                <input type="text" class="form-control" id="expression" name="expression"
+                       placeholder="e.g.  a + b * c  or  2 * 3 + 4"
+                       value="{{ expression or '' }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Translate</button>
+        </form>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger mt-3"><strong>Error:</strong> {{ error }}</div>
+{% endif %}
+
+{% if steps_table %}
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #28a745; color: white;">
+        <strong>█ STEP 1: STEP-BY-STEP TRANSLATION for "{{ expression }}"</strong>
+    </div>
+    <div class="card-body">
+        {{ steps_table|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #6f42c1; color: white;">
+        <strong>█ STEP 2: ANNOTATED PARSE TREE</strong>
+    </div>
+    <div class="card-body" style="overflow-x:auto;">
+        {{ tree_html|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #17a2b8; color: white;">
+        <strong>█ STEP 3: GENERATED THREE ADDRESS CODE (TAC)</strong>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered">
+            <thead class="table-dark"><tr><th>#</th><th>Instruction</th></tr></thead>
+            <tbody>
+                {% for i, line in code_lines %}
+                <tr><td>{{ i }}</td><td><code>{{ line }}</code></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="alert alert-info py-2 mb-0">
+            <strong>Result place:</strong> <code>{{ result_place }}</code>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #ffc107; color: black;">
+        <strong>█ STEP 4: POSTFIX EXPRESSION</strong>
+    </div>
+    <div class="card-body">
+        <p class="mb-1"><strong>Infix:</strong> <code>{{ expression }}</code></p>
+        <p class="mb-0"><strong>Postfix:</strong> <code class="fs-5 text-danger">{{ postfix }}</code></p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

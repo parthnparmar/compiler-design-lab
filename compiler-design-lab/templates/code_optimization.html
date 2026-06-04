@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Code Optimization - Compiler Design Virtual Lab{% endblock %}
+
+{% block content %}
+<h2>Code Optimization</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="expression" class="form-label">Enter Expression:</label>
+                <input type="text" class="form-control" id="expression" name="expression" 
+                       placeholder="e.g., a = 2 + 3 * 4" value="{{ expression or '' }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Optimize</button>
+        </form>
+    </div>
+</div>
+
+{% if steps %}
+<div class="card mt-3">
+    <div class="card-header"><strong>Optimization Steps</strong></div>
+    <div class="card-body">
+        {{ steps|safe }}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

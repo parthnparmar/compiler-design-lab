@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}SDD - Compiler Design Virtual Lab{% endblock %}
+
+{% block content %}
+<h2>Syntax Directed Definition (SDD)</h2>
+
+<style>
+.tree { --spacing: 1.4rem; --radius: 8px; }
+.tree li { display: block; position: relative; padding-left: calc(2*var(--spacing) - var(--radius) - 2px); }
+.tree ul { margin-left: calc(var(--radius) - var(--spacing)); padding-left: 0; }
+.tree ul li { border-left: 2px solid #adb5bd; }
+.tree ul li:last-child { border-color: transparent; }
+.tree ul li::before { content:''; display:block; position:absolute; top:calc(var(--spacing)/2 - 1px); left:-2px; width:calc(var(--spacing) + 2px); height:calc(var(--spacing) + 1px); border:solid #adb5bd; border-width:0 0 2px 2px; }
+.tree-node { display:inline-block; background:#e8f4fd; border:1px solid #4a90d9; border-radius:6px; padding:3px 10px; font-family:monospace; font-size:0.88rem; }
+</style>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Grammar (synthesized attribute <code>.val</code>):</label>
+                <pre class="border rounded p-2 bg-light mb-0">E → E + T | E - T | T
+T → T * F | T / F | F
+F → ( E ) | num | id</pre>
+            </div>
+            <div class="mb-3">
+                <label for="expression" class="form-label">Input Expression:</label>
+                <input type="text" class="form-control" id="expression" name="expression"
+                       placeholder="e.g.  3 + 4 + 5  or  2 * 3 + 4"
+                       value="{{ expression or '' }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Evaluate</button>
+        </form>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger mt-3"><strong>Error:</strong> {{ error }}</div>
+{% endif %}
+
+{% if steps_table %}
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #007bff; color: white;">
+        <strong>█ STEP 1: SDD GRAMMAR &amp; ATTRIBUTE RULES</strong>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered">
+            <thead class="table-dark"><tr><th>Production</th><th>Semantic Rule</th></tr></thead>
+            <tbody>
+                <tr><td>E → E + T</td><td>E.val = E<sub>1</sub>.val + T.val</td></tr>
+                <tr><td>E → E - T</td><td>E.val = E<sub>1</sub>.val − T.val</td></tr>
+                <tr><td>E → T</td><td>E.val = T.val</td></tr>
+                <tr><td>T → T * F</td><td>T.val = T<sub>1</sub>.val × F.val</td></tr>
+                <tr><td>T → T / F</td><td>T.val = T<sub>1</sub>.val ÷ F.val</td></tr>
+                <tr><td>T → F</td><td>T.val = F.val</td></tr>
+                <tr><td>F → ( E )</td><td>F.val = E.val</td></tr>
+                <tr><td>F → num</td><td>F.val = num.lexval</td></tr>
+                <tr><td>F → id</td><td>F.val = id.lexval</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #28a745; color: white;">
+        <strong>█ STEP 2: STEP-BY-STEP ATTRIBUTE EVALUATION for "{{ expression }}"</strong>
+    </div>
+    <div class="card-body">
+        {{ steps_table|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #6f42c1; color: white;">
+        <strong>█ STEP 3: ANNOTATED PARSE TREE</strong>
+    </div>
+    <div class="card-body" style="overflow-x:auto;">
+        {{ tree_html|safe }}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" style="background-color: #17a2b8; color: white;">
+        <strong>█ STEP 4: ATTRIBUTE TABLE</strong>
+    </div>
+    <div class="card-body">
+        {{ attr_table|safe }}
+    </div>
+</div>
+
+<div class="alert alert-success mt-3 text-center fw-bold fs-5">
+    ✅ Final Result: <code>E.val = {{ final_val }}</code>
+</div>
+{% endif %}
+{% endblock %}

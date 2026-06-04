@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Lexical Analyzer - Compiler Design Virtual Lab{% endblock %}
+
+{% block content %}
+<h2>Lexical Analyzer</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="source_code" class="form-label">Enter Source Code:</label>
+                <textarea class="form-control" id="source_code" name="source_code" rows="8" required>{{ source_code or 'int main() {\n    int a = 10;\n    float b = 20.5;\n    if (a < b) {\n        return 1;\n    }\n    return 0;\n}' }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Analyze</button>
+        </form>
+    </div>
+</div>
+
+{% if tokens %}
+<div class="card mt-3">
+    <div class="card-header"><strong>Token Table</strong></div>
+    <div class="card-body">
+        {{ tokens|safe }}
+    </div>
+</div>
+
+{% if symbols %}
+<div class="card mt-3">
+    <div class="card-header"><strong>Symbol Table</strong></div>
+    <div class="card-body">
+        {{ symbols|safe }}
+    </div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}
