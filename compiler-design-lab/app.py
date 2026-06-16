@@ -215,10 +215,13 @@ def regex_to_nfa():
         converter = RegexToNFA()
         nfa, postfix = converter.construct_nfa(regex)
         table   = converter.create_transition_table(nfa)
-        diagram = converter.visualize_nfa(nfa)
+        try:
+            diagram = converter.visualize_nfa(nfa).pipe(format='svg').decode('utf-8')
+        except Exception:
+            diagram = None
         return render_template('regex_to_nfa.html', regex=regex, postfix=postfix,
             table=pd.DataFrame(table).to_html(classes='table table-bordered', index=False),
-            diagram=diagram.pipe(format='svg').decode('utf-8'),
+            diagram=diagram,
             start=f'q{nfa["start"]}', end=f'q{nfa["end"]}')
     return render_template('regex_to_nfa.html')
 
@@ -231,7 +234,10 @@ def nfa_to_dfa():
         dfa_converter = NFAToDFA()
         dfa     = dfa_converter.convert(nfa)
         table   = dfa_converter.create_transition_table(dfa)
-        diagram = dfa_converter.visualize_dfa(dfa)
+        try:
+            diagram = dfa_converter.visualize_dfa(dfa).pipe(format='svg').decode('utf-8')
+        except Exception:
+            diagram = None
         epsilon_closures = []
         for states, closure in dfa['epsilon_closures'].items():
             if states != closure:
@@ -240,7 +246,7 @@ def nfa_to_dfa():
                     'ε-closure': '{' + ', '.join([f'q{s}' for s in sorted(closure)]) + '}'})
         return render_template('nfa_to_dfa.html', regex=regex,
             table=pd.DataFrame(table).to_html(classes='table table-bordered', index=False),
-            diagram=diagram.pipe(format='svg').decode('utf-8'),
+            diagram=diagram,
             epsilon_closures=pd.DataFrame(epsilon_closures).to_html(classes='table table-bordered', index=False) if epsilon_closures else None)
     return render_template('nfa_to_dfa.html')
 
@@ -252,7 +258,10 @@ def direct_dfa():
         result = converter.construct_dfa(regex)
         if not result['tree']:
             return render_template('direct_dfa.html', regex=regex, error='Invalid regular expression')
-        tree_diagram = converter.visualize_tree(result['tree'])
+        try:
+            tree_diagram = converter.visualize_tree(result['tree']).pipe(format='svg').decode('utf-8')
+        except Exception:
+            tree_diagram = None
         followpos_table = []
         for pos in sorted(result['followpos'].keys()):
             if pos in result['pos_symbols']:
@@ -266,9 +275,13 @@ def direct_dfa():
                 ns = result['transitions'].get(frozenset(state), {}).get(symbol)
                 row[symbol] = 'S' + str(result['state_map'][ns]) if ns else '-'
             dfa_table.append(row)
+        try:
+            dfa_diagram = converter.visualize_dfa(result).pipe(format='svg').decode('utf-8') if result['states'] else None
+        except Exception:
+            dfa_diagram = None
         return render_template('direct_dfa.html', regex=regex,
-            tree_diagram=tree_diagram.pipe(format='svg').decode('utf-8') if tree_diagram else None,
-            dfa_diagram=converter.visualize_dfa(result).pipe(format='svg').decode('utf-8') if result['states'] else None,
+            tree_diagram=tree_diagram,
+            dfa_diagram=dfa_diagram,
             followpos_table=pd.DataFrame(followpos_table).to_html(classes='table table-bordered', index=False) if followpos_table else None,
             dfa_table=pd.DataFrame(dfa_table).to_html(classes='table table-bordered', index=False) if dfa_table else None)
     return render_template('direct_dfa.html')
@@ -280,7 +293,10 @@ def dfa_minimization():
         converter = RegexToNFA(); nfa, _ = converter.construct_nfa(regex)
         dfa_converter = NFAToDFA(); dfa = dfa_converter.convert(nfa)
         minimizer = DFAMinimization(); min_dfa = minimizer.minimize(dfa)
-        diagram = minimizer.visualize_minimized_dfa(min_dfa)
+        try:
+            diagram = minimizer.visualize_minimized_dfa(min_dfa).pipe(format='svg').decode('utf-8')
+        except Exception:
+            diagram = None
         partition_steps = []
         for i, partition in enumerate(min_dfa['partition_history']):
             step = {'Step': i}
@@ -298,7 +314,7 @@ def dfa_minimization():
         return render_template('dfa_minimization.html', regex=regex,
             partition_steps=pd.DataFrame(partition_steps).to_html(classes='table table-bordered', index=False),
             min_table=pd.DataFrame(min_table).to_html(classes='table table-bordered', index=False),
-            diagram=diagram.pipe(format='svg').decode('utf-8'))
+            diagram=diagram)
     return render_template('dfa_minimization.html')
 
 @app.route('/lexical-analyzer', methods=['GET', 'POST'])
